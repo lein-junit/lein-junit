@@ -1,4 +1,4 @@
-(ns leiningen.test-java)
+(ns leiningen.test-java
   (:require lancet)
   (:use [leiningen.compile :only [make-path find-lib-jars]])
   (:import [org.apache.tools.ant.types FileSet])
@@ -7,7 +7,7 @@
 (defn test-path [project]
   (apply make-path
 	 (or (:compile-path project)
-	     (str project-root "/classes"))
+	     (str (:root project) "/classes"))
          (:resources-path project)
          (find-lib-jars project)))
 
@@ -18,7 +18,7 @@
 
 (defn test-java [project & params]
   (let [fs (lancet/fileset {:dir (or (:compile-path project) 
-				     (str project-root "/classes"))
+				     (str (:root project) "/classes"))
 			    :includes "**/*Test.class"})
 	jt (lancet/junit {})
 	bt (.createBatchTest jt)]
