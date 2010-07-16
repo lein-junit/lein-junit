@@ -4,10 +4,15 @@
   (:import [org.apache.tools.ant.types FileSet])
   (:import [org.apache.tools.ant.taskdefs.optional.junit FormatterElement]))
 
-(defn test-path [project]
+(defn unit-tests [project]
+  (-> project :java-tests :unit))
+
+(defn test-path [project category]
   (apply make-path
 	 (or (:compile-path project)
-	     (str (:root project) "/classes"))
+	     (:root project) "/classes")
+	 (:compile-path (category (:java-tests project)))
+	 (:fixture-path (category (:java-tests project)))
          (:resources-path project)
          (find-lib-jars project)))
 
@@ -16,13 +21,15 @@
     (.setClassname "org.apache.tools.ant.taskdefs.optional.junit.PlainJUnitResultFormatter")
     (.setUseFile false)))
 
-(defn test-java [project & params]
-  (let [fs (lancet/fileset {:dir (or (:compile-path project) 
-				     (str (:root project) "/classes"))
-			    :includes "**/*Test.class"})
+(defn run-tests [test-compile-dir test-path]
+  (let [fs (lancet/fileset {:dir test-compile-dir :includes "**/*Test.class"})
 	jt (lancet/junit {})
 	bt (.createBatchTest jt)]
     (.addFileSet bt fs)
     (.addFormatter bt (plain-formatter))
-    (.. jt createClasspath (addExisting (test-path project)))
+    (.. jt createClasspath (addExisting test-path))
     (.execute jt)))
+
+(defn test-java [project & params]
+  (run-tests (:compile-path (unit-tests project))
+	     (test-path project :unit)))
