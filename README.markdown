@@ -22,12 +22,12 @@ Put a section into your project.clj:
 
     :java-tests { :unit
                   { :source-path  "test/java/unit"
-		    :compile-path "build/test/unit/classes"
-		    :fixture-path "test/fixtures" }
-	          :integration
-	          { :source-path  "test/java/integration"
-		    :compile-path "build/test/integration/classes"
-		    :fixture-path "test/fixtures" }}
+                    :compile-path "build/test/unit/classes"
+                    :fixture-path "test/fixtures" }
+                  :integration
+                  { :source-path  "test/java/integration"
+                    :compile-path "build/test/integration/classes"
+                    :fixture-path "test/fixtures" }}
 
 (If you want to compile java tests with Leiningen as well have a look
 at my lein-javac branch: http://github.com/febeling/lein-javac)
