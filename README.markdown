@@ -36,7 +36,7 @@ at my lein-javac branch: http://github.com/febeling/lein-javac)
 
 Run
 
-  lein install
+    lein install
 
 in the project's root directory, to install to local repository.
 
