@@ -1,6 +1,6 @@
 (ns leiningen.test-java
   (:require lancet)
-  (:use [leiningen.compile :only [make-path find-lib-jars]])
+  (:use [leiningen.classpath :only [find-lib-jars make-path]])
   (:import [org.apache.tools.ant.types FileSet])
   (:import [org.apache.tools.ant.taskdefs.optional.junit FormatterElement]))
 
