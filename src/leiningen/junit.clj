@@ -1,23 +1,31 @@
 (ns leiningen.junit
   (:require lancet)
-  (:use [leiningen.classpath :only [find-lib-jars make-path]]
+  (:use [leiningen.classpath :only [get-classpath find-lib-jars make-path]]
         [clojure.contrib.def :ony (defvar)])
   (:import [org.apache.tools.ant.types FileSet]
            [org.apache.tools.ant.taskdefs.optional.junit BriefJUnitResultFormatter
-            FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter XMLJUnitResultFormatter]))
-
-;; org.apache.tools.ant.taskdefs.optional.junit.JUnitTask
-;; (lancet/junit {})
+            FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter
+            XMLJUnitResultFormatter]
+           java.io.File))
 
 (defvar *junit-options*
   { }
   "The default options for the JUnit task.")
 
+(defn- expand-path
+  "Expand a path fragment relative to the project root. If path starts
+  with File/separator it is treated as an absolute path and will not
+  be modified."
+  [project path]
+  (if-not (= (str (first path)) File/separator)
+    (str (:root project) File/separator path)
+    path))
+
 (defn- extract-fileset
   "Extract the fileset from the spec."
-  [[dir & options]]  
+  [project [dir & options]]  
   (lancet/fileset
-   (merge {:dir dir :includes "**/*Test.class"}
+   (merge {:dir (expand-path project dir) :includes "**/*Test.class"}
           (apply hash-map options))))
 
 (defn- junit-formatter-class
@@ -44,19 +52,20 @@
 
 (defn- extract-task [project task-spec]
   (let [task (lancet/junit (junit-options project))]
+    ;; (.. task createClasspath (addExisting (conj (get-classpath project)
+    ;;                                             (expand-path project (first task-spec)))))
     (doto (.createBatchTest task)
-      (.addFileSet (extract-fileset task-spec))
+      ;; (.addFileSet (extract-fileset project task-spec))
       (.addFormatter (extract-formatter project)))
     task))
 
 (defn- extract-tasks [project]
   (let [tasks (map #(extract-task project %) (:junit project))]
     (if (empty? tasks)
-      [(extract-task project [(:compile-path project) :includes "**/*Test.class"])]
+      [(extract-task project ["classes" :includes "**/*Test.class"])]
       tasks)))
 
 (defn junit [project & [directory]]
-  (println (extract-tasks project))
   (doseq [task (extract-tasks project)]    
     (.execute task)))
 
@@ -79,7 +88,6 @@
 ;;     (.setClassname "org.apache.tools.ant.taskdefs.optional.junit.SummaryJUnitResultFormatter")
 ;;     (.setUseFile false)))
 
-
 ;; (defn unit-tests [project]
 ;;   (-> project :java-tests :unit))
 
@@ -100,7 +108,7 @@
 ;; 	bt (.createBatchTest jt)]
 ;;     (.addFileSet bt fs)
 ;;     (.addFormatter bt (plain-formatter))
-;;     (.. jt createClasspath (addExisting test-path))
+;;     (.. jt createClasspath (addExisting test-path))a
 ;;     (.execute jt)))
 
 ;; (defn test-java [project & params]
