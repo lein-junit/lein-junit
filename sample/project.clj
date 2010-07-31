@@ -4,10 +4,9 @@
 ;; "lein new".
 
 (defproject sample-project "0.0.1-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.2.0-beta1"]]
+  :dependencies [[org.clojure/clojure "1.2.0-RC1"]]
   :dev-dependencies [[lein-javac "1.2.1-SNAPSHOT"]
-                     [lein-junit "0.0.3-SNAPSHOT"]
-                     [junit/junit "4.8.1"]]
+                     [lein-junit "0.0.3-SNAPSHOT"]]
   :source-path "src/clojure"
   :java-source-path [["src/java"] ["test/java"]]
   :junit [["classes" :includes "**/*Test.class"]])
