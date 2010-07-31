@@ -55,8 +55,9 @@
     ;; (.. task createClasspath (addExisting (conj (get-classpath project)
     ;;                                             (expand-path project (first task-spec)))))
     (doto (.createBatchTest task)
-      ;; (.addFileSet (extract-fileset project task-spec))
-      (.addFormatter (extract-formatter project)))
+      (.addFileSet (extract-fileset project task-spec))
+      ;; (.addFormatter (extract-formatter project))
+      )
     task))
 
 (defn- extract-tasks [project]

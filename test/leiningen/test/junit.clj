@@ -61,6 +61,6 @@
 (deftest test-junit
   (junit *project*))
 
-(extract-task *project* ["sample/classes"])
+;; (extract-task *project* ["sample/classes"])
 
 ;; (.execute (first (extract-tasks *project*)))
