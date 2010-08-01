@@ -20,7 +20,7 @@
 (deftest test-extract-formatter
   (let [formatter (extract-formatter *project*)]
     (is (isa? (class formatter) FormatterElement))
-    (is (= (.getClassname formatter) (str SummaryJUnitResultFormatter)))))
+    (is (= (.getClassname formatter) (.getName SummaryJUnitResultFormatter)))))
 
 (deftest test-extract-fileset
   (let [fileset (extract-fileset *project* ["classes" :includes "**/*Test.class"])]
@@ -46,7 +46,7 @@
   (are [type expected-class]
     (let [formatter-element (junit-formatter-element type)]
       (is (isa? (class formatter-element) FormatterElement))
-      (is (= (.getClassname formatter-element) (str (junit-formatter-class type)))))
+      (is (= (.getClassname formatter-element) (.getName (junit-formatter-class type)))))
     :brief :plain :summary :xml
     "brief" "plain" "summary" "xml"))
 
@@ -62,5 +62,7 @@
   (junit *project*))
 
 ;; (extract-task *project* ["sample/classes"])
+
+;; (leiningen.classpath/get-classpath *project*)
 
 ;; (.execute (first (extract-tasks *project*)))

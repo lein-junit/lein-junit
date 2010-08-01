@@ -1,16 +1,19 @@
 (ns leiningen.junit
   (:require lancet)
   (:use [leiningen.classpath :only [get-classpath find-lib-jars make-path]]
+        [leiningen.javac :only (javac)]
         [clojure.contrib.def :ony (defvar)])
-  (:import [org.apache.tools.ant.types FileSet]
+  (:import [org.apache.tools.ant.types FileSet Path]
            [org.apache.tools.ant.taskdefs.optional.junit BriefJUnitResultFormatter
             FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter
             XMLJUnitResultFormatter]
            java.io.File))
 
 (defvar *junit-options*
-  { }
-  "The default options for the JUnit task.")
+  {} "The default options for the JUnit task.")
+
+(defmethod lancet/coerce [Path String] [_ str]
+  (Path. lancet/ant-project str))
 
 (defn- expand-path
   "Expand a path fragment relative to the project root. If path starts
@@ -38,26 +41,35 @@
       :xml XMLJUnitResultFormatter
       :summary SummaryJUnitResultFormatter))
 
-(defn- junit-formatter-element [type & [use-file]]
+(defn- junit-formatter-element
+  "Returns a JUnit formatter element for the given type. Type can be a
+  string or a keyword."
+  [type & [use-file]]
   (doto (FormatterElement.)
-    (.setClassname (str (junit-formatter-class type)))
+    (.setClassname (.getName (junit-formatter-class type)))
     (.setUseFile false)))
 
-(defn extract-formatter [project]
-  (junit-formatter-element (or (:junit-formatter project) :summary)))
+(defn extract-formatter
+  "Extract the Junit formatter element from the project."
+  [project] (junit-formatter-element (or (:junit-formatter project) :summary)))
 
 (defn- junit-options
   "Returns the JUnit options of the project."
   [project] (merge *junit-options* (:junit-options project)))
 
+(defn- configure-classpath
+  "Configure the classpath for the JUnit task."
+  [project junit-task & paths]
+  (let [classpath (.createClasspath junit-task)]
+    (doseq [path (get-classpath project)]
+      (.addExisting classpath (Path. lancet/ant-project (str path))))))
+
 (defn- extract-task [project task-spec]
   (let [task (lancet/junit (junit-options project))]
-    ;; (.. task createClasspath (addExisting (conj (get-classpath project)
-    ;;                                             (expand-path project (first task-spec)))))
+    (configure-classpath project task (expand-path project (first task-spec)))
     (doto (.createBatchTest task)
       (.addFileSet (extract-fileset project task-spec))
-      ;; (.addFormatter (extract-formatter project))
-      )
+      (.addFormatter (extract-formatter project)))
     task))
 
 (defn- extract-tasks [project]
@@ -67,6 +79,7 @@
       tasks)))
 
 (defn junit [project & [directory]]
+  (javac project)
   (doseq [task (extract-tasks project)]    
     (.execute task)))
 
