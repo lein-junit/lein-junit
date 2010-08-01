@@ -3,18 +3,14 @@ public class Subscription {
     private int price;
     private int length;
 
-    public Subscription(int p, int n) {
-        price = p ;
-        length = n ;
+    public Subscription(int price, int length) {
+        this.price = price;
+        this.length = length;
     }
 
-    public double pricePerMonth() {
+    public double getPricePerMonth() {
         double r = (double) price / (double) length;
         return r ;
-    }
-
-    public void cancel() { 
-        length = 0 ; 
     }
 
 }
