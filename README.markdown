@@ -26,11 +26,11 @@ Example:
 
 Running all junit test.
 
-  $ lein junit
+    $ lein junit
 
 Running junit test in a specific directory.
 
-  $ lein junit src/java
+    $ lein junit src/java
 
 ## Installation
 
