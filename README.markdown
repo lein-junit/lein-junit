@@ -1,44 +1,40 @@
 # lein-junit
 
-This is a Leiningen plugin that allows to run JUnit test suites.
+This is a Leiningen plugin that allows to run JUnit test suites. If
+you want to compile java tests with Leiningen as well have a look at
+my lein-javac branch: http://github.com/febeling/lein-javac
 
-(If you have a good idea how to make whole targets optional and only
-show up in 'lein help' if wanted, drop me a note.)
+## Configuration
+
+The directories containing the compiled java tests can be specified by
+the "junit" option in the project.clj file. 
+
+Example:
+
+    (defproject sample-project "0.0.1-SNAPSHOT"
+      :dependencies [[org.clojure/clojure "1.2.0-RC1"]]
+      :dev-dependencies [[lein-javac "1.2.1-SNAPSHOT"]
+                         [lein-junit "0.0.3-SNAPSHOT"]
+                         [junit/junit "4.8.1"]]
+      :source-path "src/clojure"
+      :java-source-path [["src/java"] ["test/java"]]
+      :junit [["classes" :includes "**/*Test.class"]]
+      :jvm-opts ["-XX:MaxPermSize=128m"])
+
 
 ## Usage
 
-Install, see below. Then declare dev-dependency in project.clj:
+Running all junit test.
 
-    :dev-dependencies [[lein-javac "0.0.3-SNAPSHOT"]
-                      ...
-                      ]
+  $ lein junit
 
-Run 'lein deps'. Afterwards 'lein help' should show additional targets:
+Running junit test in a specific directory.
 
-    test-java
-    test-java-integration
-
-Put a section into your project.clj:
-
-    :java-tests { :unit
-                  { :source-path  "test/java/unit"
-                    :compile-path "build/test/unit/classes"
-                    :fixture-path "test/fixtures" }
-                  :integration
-                  { :source-path  "test/java/integration"
-                    :compile-path "build/test/integration/classes"
-                    :fixture-path "test/fixtures" }}
-
-(If you want to compile java tests with Leiningen as well have a look
-at my lein-javac branch: http://github.com/febeling/lein-javac)
+  $ lein junit src/java
 
 ## Installation
 
-Run
-
-    lein install
-
-in the project's root directory, to install to local repository.
+Do it yourself, until this project has been put on clojars.
 
 ## License
 
