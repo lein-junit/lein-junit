@@ -24,11 +24,11 @@ Example:
 
 ## Usage
 
-Running all junit test.
+Run all junit test.
 
     $ lein junit
 
-Running junit test in a specific directory.
+Run all junit test in a specific directory.
 
     $ lein junit src/java
 
