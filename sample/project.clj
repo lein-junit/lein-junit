@@ -10,5 +10,5 @@
                      [junit/junit "4.8.1"]]
   :source-path "src/clojure"
   :java-source-path [["src/java"] ["test/java"]]
-  :junit [["classes" :includes "**/*Test.class"]]
+  :junit [["classes"]]
   :jvm-opts ["-XX:MaxPermSize=128m"])
