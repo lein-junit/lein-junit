@@ -8,8 +8,7 @@
         [clojure.contrib.seq :only (includes?)])
   (:import [org.apache.tools.ant.types FileSet Path]
            [org.apache.tools.ant.taskdefs.optional.junit BriefJUnitResultFormatter
-            FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter
-            XMLJUnitResultFormatter]
+            FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter XMLJUnitResultFormatter]
            java.io.File))
 
 (defvar *junit-options*
