@@ -2,7 +2,7 @@
 
 This is a Leiningen plugin that allows to run JUnit test suites. If
 you want to compile java tests with Leiningen as well have a look at
-my lein-javac branch: http://github.com/febeling/lein-javac
+my [lein-javac](http://github.com/febeling/lein-javac) branch.
 
 ## Configuration
 
