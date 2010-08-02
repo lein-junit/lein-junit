@@ -30,7 +30,7 @@
 (deftest test-extract-formatter
   (let [formatter (extract-formatter *project*)]
     (is (isa? (class formatter) FormatterElement))
-    (is (= (.getClassname formatter) (.getName SummaryJUnitResultFormatter)))))
+    (is (= (.getClassname formatter) (.getName BriefJUnitResultFormatter)))))
 
 (deftest test-extract-fileset
   (is (= (extract-fileset *project* *fileset-spec*)

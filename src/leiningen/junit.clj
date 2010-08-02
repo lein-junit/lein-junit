@@ -64,7 +64,7 @@
 
 (defn- extract-formatter
   "Extract the Junit formatter element from the project."
-  [project] (junit-formatter-element (or (:junit-formatter project) :summary)))
+  [project] (junit-formatter-element (or (:junit-formatter project) :brief)))
 
 (defn- junit-options
   "Returns the JUnit options of the project."
