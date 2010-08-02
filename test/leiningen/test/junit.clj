@@ -60,9 +60,3 @@
 
 (deftest test-junit
   (junit *project*))
-
-;; (extract-task *project* ["sample/classes"])
-
-;; (leiningen.classpath/get-classpath *project*)
-
-;; (.execute (first (extract-tasks *project*)))

@@ -1,10 +1,10 @@
 import org.junit.*;
-import static org.junit.Assert.*;
+import junit.framework.TestCase;
 
-public class SubscriptionTest {
+public class SubscriptionTest extends TestCase {
 
     @Test
-    public void testgetPricePerMonth() {
+    public void testGetPricePerMonth() {
         Subscription s = new Subscription(200, 2);
         assertTrue(s.getPricePerMonth() == 100.0);
     }
