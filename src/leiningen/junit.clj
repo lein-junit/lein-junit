@@ -106,5 +106,7 @@
     junit-task))
 
 (defn junit [project & directories]
-  (-> project deps javac)
+  (when (empty? (find-lib-jars project))
+    (deps project))
+  (javac project)
   (.execute (apply extract-task project directories)))
