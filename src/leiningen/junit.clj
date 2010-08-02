@@ -1,6 +1,7 @@
 (ns leiningen.junit
   (:require lancet)
   (:use [leiningen.classpath :only [get-classpath find-lib-jars make-path]]
+        [leiningen.deps :only (deps)]
         [leiningen.javac :only (javac)]
         [clojure.contrib.def :ony (defvar)])
   (:import [org.apache.tools.ant.types FileSet Path]
@@ -79,6 +80,7 @@
       tasks)))
 
 (defn junit [project & [directory]]
+  (deps project)
   (javac project)
   (doseq [task (extract-tasks project)]    
     (.execute task)))
