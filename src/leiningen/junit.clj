@@ -62,7 +62,7 @@
   "Configure the classpath for the JUnit task."
   [project junit-task & paths]
   (let [classpath (.createClasspath junit-task)]
-    (doseq [path (get-classpath project)]
+    (doseq [path (concat (get-classpath project) paths)]
       (.addExisting classpath (Path. lancet/ant-project (str path))))))
 
 (defn- extract-task [project task-spec]
