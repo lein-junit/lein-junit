@@ -28,7 +28,7 @@
     (is (= (str (.getDir fileset lancet/ant-project)) (expand-path *project* "classes")))))
 
 (deftest test-junit-options
-  (is (= (junit-options *project*) {})))
+  (is (= (junit-options *project*) {:fork "on"})))
 
 (deftest test-junit-formatter-class
   (are [type expected-class]

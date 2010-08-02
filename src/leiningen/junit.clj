@@ -1,6 +1,7 @@
 (ns leiningen.junit
   (:require lancet)
   (:use [leiningen.classpath :only [get-classpath find-lib-jars make-path]]
+        [leiningen.compile :only (get-jvm-args)]
         [leiningen.deps :only (deps)]
         [leiningen.javac :only (javac)]
         [clojure.contrib.def :ony (defvar)])
@@ -11,7 +12,7 @@
            java.io.File))
 
 (defvar *junit-options*
-  {} "The default options for the JUnit task.")
+  {:fork "on"} "The default options for the JUnit task.")
 
 (defmethod lancet/coerce [Path String] [_ str]
   (Path. lancet/ant-project str))
@@ -65,13 +66,21 @@
     (doseq [path (concat (get-classpath project) paths)]
       (.addExisting classpath (Path. lancet/ant-project (str path))))))
 
+(defn- configure-jvm-args
+  "Configure the JVM arguments for the JUnit task."
+  [project junit-task]
+  (doseq [arg (get-jvm-args project)]
+      (when-not (re-matches #"^-Xbootclasspath.+" arg)
+        (.setValue (.createJvmarg junit-task) arg))))
+
 (defn- extract-task [project task-spec]
-  (let [task (lancet/junit (junit-options project))]
-    (configure-classpath project task (expand-path project (first task-spec)))
-    (doto (.createBatchTest task)
+  (let [junit-task (lancet/junit (junit-options project))]
+    (configure-classpath project junit-task (expand-path project (first task-spec)))
+    (configure-jvm-args project junit-task)
+    (doto (.createBatchTest junit-task)
       (.addFileSet (extract-fileset project task-spec))
       (.addFormatter (extract-formatter project)))
-    task))
+    junit-task))
 
 (defn- extract-tasks [project]
   (let [tasks (map #(extract-task project %) (:junit project))]
