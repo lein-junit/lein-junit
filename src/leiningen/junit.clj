@@ -1,22 +1,23 @@
 (ns leiningen.junit
-  (:require lancet)
-  (:use [leiningen.classpath :only [get-classpath find-lib-jars make-path]]
+  (:require lancet.core)
+  (:use [leiningen.classpath :only [get-classpath]]
         [leiningen.compile :only (get-jvm-args)]
         [leiningen.deps :only (deps)]
         [leiningen.javac :only (javac)]
-        [clojure.contrib.def :only (defvar)]
-        [clojure.contrib.seq :only (includes?)])
+        [clojure.java.io :only (file)])
   (:import [org.apache.tools.ant.types FileSet Path]
            [org.apache.tools.ant.taskdefs.optional.junit BriefJUnitResultFormatter
             FormatterElement SummaryJUnitResultFormatter PlainJUnitResultFormatter XMLJUnitResultFormatter]
            java.io.File))
 
-(defvar *junit-options*
-  {:fork "on" :haltonerror "off" :haltonfailure "off"}
-  "The default options for the JUnit task.")
+(def ^{:dynamic true} *junit-options*
+  {:fork "on" :haltonerror "off" :haltonfailure "off"})
 
-(defmethod lancet/coerce [Path String] [_ str]
-  (Path. lancet/ant-project str))
+(defn- find-lib-jars [project]
+  (.listFiles (file (:library-path project))))
+
+(defmethod lancet.core/coerce [Path String] [_ str]
+  (Path. lancet.core/ant-project str))
 
 (defn- expand-path
   "Expand a path fragment relative to the project root. If path starts
@@ -29,7 +30,7 @@
 
 (defn- extract-fileset
   "Extract the fileset from the specification."
-  [project [dir & options]]    
+  [project [dir & options]]
   (merge {:dir (expand-path project dir) :includes "**/*Test.class"}
          (apply hash-map options)))
 
@@ -41,7 +42,7 @@
   "Extract the applicable filesets from the project."
   [project & directories]
   (let [directories (map #(expand-path project %) directories)]
-    (filter #(or (empty? directories) (includes? directories (:dir %)))
+    (filter #(or (empty? directories) (contains? (set directories) (:dir %)))
             (extract-filesets project))))
 
 (defn- junit-formatter-class
@@ -76,19 +77,19 @@
   (let [batch-task (.createBatchTest junit-task)
         junit-options (junit-options project)]
     (doseq [fileset filesets]
-      (.addFileSet batch-task (lancet/fileset fileset)))
-    (doto batch-task      
+      (.addFileSet batch-task (lancet.core/fileset fileset)))
+    (doto batch-task
       (.addFormatter (extract-formatter project))
-      (.setFork (lancet/coerce Boolean/TYPE (:fork junit-options)))
-      (.setHaltonerror (lancet/coerce Boolean/TYPE (:haltonerror junit-options)))
-      (.setHaltonfailure (lancet/coerce Boolean/TYPE (:haltonfailure junit-options))))))
+      (.setFork (lancet.core/coerce Boolean/TYPE (:fork junit-options)))
+      (.setHaltonerror (lancet.core/coerce Boolean/TYPE (:haltonerror junit-options)))
+      (.setHaltonfailure (lancet.core/coerce Boolean/TYPE (:haltonfailure junit-options))))))
 
 (defn- configure-classpath
   "Configure the classpath for the JUnit task."
   [project junit-task filesets]
   (let [classpath (.createClasspath junit-task)]
     (doseq [path (concat (get-classpath project) (map :dir filesets))]
-      (.addExisting classpath (Path. lancet/ant-project (str path))))))
+      (.addExisting classpath (Path. lancet.core/ant-project (str path))))))
 
 (defn- configure-jvm-args
   "Configure the JVM arguments for the JUnit task."
@@ -99,7 +100,7 @@
 
 (defn- extract-task [project & directories]
   (let [filesets (apply extract-applicable-filesets project directories)
-        junit-task (lancet/junit (junit-options project))]
+        junit-task (lancet.core/junit (junit-options project))]
     (configure-batch-test project junit-task filesets)
     (configure-classpath project junit-task filesets)
     (configure-jvm-args project junit-task)
