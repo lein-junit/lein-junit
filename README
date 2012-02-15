@@ -1,0 +1,40 @@
+# lein-junit
+
+This is a Leiningen plugin that allows to run JUnit test suites. If
+you want to compile java tests with Leiningen as well have a look at
+https://github.com/antoniogarrote/lein-javac
+
+## Configuration
+
+The directories containing the compiled java tests can be specified by
+the "junit" option in the project.clj file.
+
+Example:
+
+  (defproject sample-project "0.0.1-SNAPSHOT"
+    :dependencies [[org.clojure/clojure "1.3.0"]]
+    :plugins [[lein-javac "1.3.0"]
+              [lein-junit "1.0.0"]]
+    :hooks [leiningen.hooks.javac leiningen.hooks.junit]
+    :source-path "src/clojure"
+    :javac-source-path [["src/java"] ["test/java"]]
+    :junit [["classes"]]
+    :jvm-opts ["-XX:MaxPermSize=128m"])
+
+## Usage
+
+Run all junit test.
+
+  $ lein junit
+
+Run all junit test in a specific directory.
+
+  $ lein junit src/java
+
+## Installation
+
+Via Clojars: http://clojars.org/lein-junit
+
+## License
+
+Same as Clojure, EPL1.0.

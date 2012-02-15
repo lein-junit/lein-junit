@@ -1,7 +1,7 @@
-(defproject lein-junit "0.0.8-SNAPSHOT"
+(defproject lein-junit "1.0.0"
   :author "Caspar Florian Ebeling, Roman Scherer"
   :description "JUnit plugin for Leiningen"
   :url "http://github.com/febeling/lein-junit"
   :dependencies [[ant/ant-junit "1.6.5"]]
-  :dev-dependencies [[leiningen/leiningen "1.6.2"]
+  :dev-dependencies [[leiningen/leiningen "1.7.0"]
                      [junit/junit "4.8.1"]])
