@@ -13,13 +13,13 @@
 (def fileset-spec ["classes" :includes "**/*Test.class"])
 
 (deftest test-configure-batch-test
-  (configure-batch-test project (lancet/junit {}) (extract-filesets project)))
+  (configure-batch-test project (lancet.core/junit {}) (extract-filesets project)))
 
 (deftest test-configure-classpath
-  (configure-classpath project (lancet/junit {}) (extract-filesets project)))
+  (configure-classpath project (lancet.core/junit {}) (extract-filesets project)))
 
 (deftest test-configure-jvm-args
-  (configure-jvm-args project (lancet/junit {})))
+  (configure-jvm-args project (lancet.core/junit {})))
 
 (deftest test-expand-path
   (is (= (expand-path project "/tmp")

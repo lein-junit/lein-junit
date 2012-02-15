@@ -4,10 +4,11 @@
 ;; "lein new".
 
 (defproject sample-project "0.0.1-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.2.0-RC1"]]
-  :dev-dependencies [[lein-junit "0.0.4-SNAPSHOT"]
-                     [junit/junit "4.8.1"]]
+  :dependencies [[org.clojure/clojure "1.3.0"]]
+  :plugins [[lein-javac "1.3.0"]
+            [lein-junit "1.0.0"]]
+  :hooks [leiningen.hooks.javac leiningen.hooks.junit]
   :source-path "src/clojure"
-  :java-source-path [["src/java"] ["test/java"]]
+  :javac-source-path [["src/java"] ["test/java"]]
   :junit [["classes"]]
   :jvm-opts ["-XX:MaxPermSize=128m"])
