@@ -1,3 +1,5 @@
+package com.example;
+
 import org.junit.*;
 import junit.framework.TestCase;
 

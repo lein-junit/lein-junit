@@ -1,51 +1,27 @@
 (ns leiningen.test.junit
+  (:refer-clojure :exclude [read])
   (:import [org.apache.tools.ant.types FileSet]
            [org.apache.tools.ant.taskdefs.optional.junit
-            BriefJUnitResultFormatter FormatterElement JUnitTask JUnitResultFormatter
+            BatchTest BriefJUnitResultFormatter FormatterElement JUnitTask JUnitResultFormatter
             PlainJUnitResultFormatter SummaryJUnitResultFormatter XMLJUnitResultFormatter]
            java.io.File)
-  (:use [leiningen.core :only (defproject read-project)]
-        clojure.test leiningen.junit leiningen.test.helper))
+  (:require [clojure.test :refer :all]
+            [lancet.core :as lancet]
+            [leiningen.core.project :refer [read]]
+            [leiningen.junit :refer :all]
+            [leiningen.test.helper :refer :all]))
 
-(refer-private 'leiningen.junit)
-
-(def project (read-project "sample/project.clj"))
+(def project (read "sample/project.clj"))
 (def fileset-spec ["classes" :includes "**/*Test.class"])
 
 (deftest test-configure-batch-test
-  (configure-batch-test project (lancet.core/junit {}) (extract-filesets project)))
+  (is (instance? BatchTest (configure-batch-test project (lancet/junit {}) (testcase-fileset project)))))
 
 (deftest test-configure-classpath
-  (configure-classpath project (lancet.core/junit {}) (extract-filesets project)))
+  (is (configure-classpath project (lancet/junit {}))))
 
 (deftest test-configure-jvm-args
-  (configure-jvm-args project (lancet.core/junit {})))
-
-(deftest test-expand-path
-  (is (= (expand-path project "/tmp")
-         "/tmp"))
-  (is (= (expand-path project "src")
-         (str (:root project) File/separator "src"))))
-
-(deftest test-extract-formatter
-  (let [formatter (extract-formatter project)]
-    (is (isa? (class formatter) FormatterElement))
-    (is (= (.getClassname formatter) (.getName BriefJUnitResultFormatter)))))
-
-(deftest test-extract-fileset
-  (is (= (extract-fileset project fileset-spec)
-         {:dir (expand-path project "classes") :includes "**/*Test.class"})))
-
-(deftest test-extract-applicable-filesets
-  (is (= (extract-filesets project)
-         [(extract-fileset project fileset-spec)])))
-
-(deftest test-extract-applicable-filesets
-  (is (= (extract-applicable-filesets project)
-         [(extract-fileset project fileset-spec)]))
-  (is (= (extract-applicable-filesets project "classes")
-         [(extract-fileset project fileset-spec)]))
-  (is (empty? (extract-applicable-filesets project "not-existing"))))
+  (configure-jvm-args project (lancet/junit {})))
 
 (deftest test-junit-options
   (is (= (junit-options project) {:fork "on" :haltonerror "off" :haltonfailure "off"})))
@@ -73,8 +49,18 @@
 (deftest test-extract-task
   (let [task (extract-task project)]
     (is (isa? (class task) JUnitTask)))
-  (let [task (extract-task project "classes")]
+  (let [task (extract-task project "com.example")]
     (is (isa? (class task) JUnitTask))))
 
+(deftest test-testcase-fileset
+  (are [fileset expected]
+    (is (= expected (seq (.getIncludedFiles (.getDirectoryScanner fileset)))))
+    (testcase-fileset project) ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.example") ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.example.Subscription") ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.example" "com.other") ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.other") nil))
+
 (deftest test-junit
-  (junit project))
+  (junit project)
+  (junit project "com.example" "com.other"))
