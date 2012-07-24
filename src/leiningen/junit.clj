@@ -4,6 +4,7 @@
             [clojure.string :refer [join replace]]
             [lancet.core :as lancet]
             [leiningen.core.classpath :refer [get-classpath]]
+            [leiningen.javac :refer [javac]]
             leiningen.core.eval)
   (:import [java.io File]
            [org.apache.tools.ant.types FileSet Path]
@@ -110,6 +111,7 @@
 (defn junit
   "Run the Java test via JUnit."
   [project & selectors]
+  (javac project)
   (let [junit-task (apply extract-task project selectors)]
     (.setErrorProperty junit-task "lein-junit.errors")
     (.setFailureProperty junit-task "lein-junit.failures")
