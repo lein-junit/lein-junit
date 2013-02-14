@@ -7,3 +7,4 @@ classes
 /.lein-deps-sum
 /target
 /sample/target
+/sample/.lein-failures
