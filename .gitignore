@@ -8,3 +8,4 @@ classes
 /target
 /sample/target
 /sample/.lein-failures
+/pom.xml.asc
