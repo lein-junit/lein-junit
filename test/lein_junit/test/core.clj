@@ -53,12 +53,19 @@
 
 (deftest test-testcase-fileset
   (are [fileset expected]
-       (is (= expected (seq (.getIncludedFiles (.getDirectoryScanner fileset)))))
-       (testcase-fileset project) ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.example") ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.example.Subscription") ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.example" "com.other") ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.other") nil))
+       (is (= (sort expected)
+              (sort (seq (.getIncludedFiles (.getDirectoryScanner fileset))))))
+       (testcase-fileset project)
+       ["com/example/SubscriptionTest.class"
+        "com/other/SubscriptionTest.class"]
+       (testcase-fileset project "com.example")
+       ["com/example/SubscriptionTest.class"]
+       (testcase-fileset project "com.example.Subscription")
+       ["com/example/SubscriptionTest.class"]
+       (testcase-fileset project "com.example" "com.other")
+       ["com/example/SubscriptionTest.class"
+        "com/other/SubscriptionTest.class"]
+       (testcase-fileset project "com.another") nil))
 
 (deftest test-junit-all
   (try
