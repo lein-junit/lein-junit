@@ -53,7 +53,7 @@
   "Returns a JUnit formatter for the given type. Type can be a string
   or a keyword."
   [type]
-  (condp = (keyword type)
+  (case (keyword type)
     :brief BriefJUnitResultFormatter
     :plain PlainJUnitResultFormatter
     :xml XMLJUnitResultFormatter
