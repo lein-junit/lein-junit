@@ -6,6 +6,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.apache.ant/ant-junit "1.8.4"]
+                 [org.clojure/clojure "1.5.0"]
                  [lancet "1.0.1"]
                  [junit/junit "4.11"]]
   :eval-in-leiningen true)
