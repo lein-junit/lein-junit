@@ -11,7 +11,8 @@
            [org.apache.tools.ant.types FileSet Path]
            [org.apache.tools.ant.taskdefs.optional.junit
             BriefJUnitResultFormatter FormatterElement SummaryJUnitResultFormatter
-            PlainJUnitResultFormatter XMLJUnitResultFormatter]))
+            PlainJUnitResultFormatter XMLJUnitResultFormatter JUnitTask$SummaryAttribute]
+))
 
 (def ^{:dynamic true} *junit-options*
   {:fork "on" :haltonerror "off" :haltonfailure "off"})
@@ -114,9 +115,17 @@
   "Run the Java test via JUnit."
   [project & selectors]
   (javac project)
-  (let [junit-task (apply extract-task project selectors)]
+  (let [junit-task (apply extract-task project selectors)
+        summary ()]
     (.setErrorProperty junit-task "lein-junit.errors")
     (.setFailureProperty junit-task "lein-junit.failures")
+
+    (if (:junit-formatter-use-file project)
+      (do
+        (let [summary-attribute (JUnitTask$SummaryAttribute.)]
+          (.setValue summary-attribute "withOutAndErr")
+          (.setPrintsummary junit-task summary-attribute))))
+
     (.execute junit-task)
     (if (or (.getProperty lancet/ant-project "lein-junit.errors")
             (.getProperty lancet/ant-project "lein-junit.failures"))
