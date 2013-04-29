@@ -53,12 +53,12 @@
                                                             (into-array Class nil))
                                   (doto (.setAccessible true))
                                   (.invoke obj (into-array Object nil))))
-        with-file (junit-formatter-element :plain "on")
-        without-file (junit-formatter-element :plain "off")
+        with-use-file (junit-formatter-element :plain "on")
+        without-use-file (junit-formatter-element :plain "off")
         formatter-file-off-by-default (junit-formatter-element :plain)]
-    (is (call-get-use-file with-file) true)
-    (is (call-get-use-file without-file) false)
-    (is (call-get-use-file formatter-file-off-by-default) false)))
+    (is (= (call-get-use-file with-use-file) true))
+    (is (= (call-get-use-file without-use-file) false))
+    (is (= (call-get-use-file formatter-file-off-by-default) false))))
 
 (deftest test-extract-task
   (let [task (extract-task project)]
