@@ -65,11 +65,12 @@
   [type & [use-file]]
   (doto (FormatterElement.)
     (.setClassname (.getName (junit-formatter-class type)))
-    (.setUseFile false)))
+    (.setUseFile (lancet/coerce Boolean/TYPE (or use-file "off")))))
 
 (defn extract-formatter
   "Extract the Junit formatter element from the project."
-  [project] (junit-formatter-element (or (:junit-formatter project) :brief)))
+  [project] (junit-formatter-element (or (:junit-formatter project) :brief)
+                                     (or (:junit-formatter-use-file project) "off")))
 
 (defn junit-options
   "Returns the JUnit options of the project."
