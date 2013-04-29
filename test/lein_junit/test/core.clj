@@ -45,6 +45,21 @@
        :brief :plain :summary :xml
        "brief" "plain" "summary" "xml"))
 
+(deftest test-junit-extract-formatter
+  ;; FormatterElement.getUseFile is declared package private, so we
+  ;; need to make it accessible before we can invoke it.
+  (let [call-get-use-file (fn [obj]
+                              (-> FormatterElement (.getDeclaredMethod (name "getUseFile")
+                                                            (into-array Class nil))
+                                  (doto (.setAccessible true))
+                                  (.invoke obj (into-array Object nil))))
+        with-file (junit-formatter-element :plain "on")
+        without-file (junit-formatter-element :plain "off")
+        formatter-file-off-by-default (junit-formatter-element :plain)]
+    (is (call-get-use-file with-file) true)
+    (is (call-get-use-file without-file) false)
+    (is (call-get-use-file formatter-file-off-by-default) false)))
+
 (deftest test-extract-task
   (let [task (extract-task project)]
     (is (isa? (class task) JUnitTask)))
