@@ -104,6 +104,8 @@
 
 (defn extract-task [project & selectors]
   (let [junit-task (lancet/junit (junit-options project))]
+    (.setErrorProperty junit-task "lein-junit.errors")
+    (.setFailureProperty junit-task "lein-junit.failures")
     (configure-batch-test project junit-task (apply testcase-fileset project selectors))
     (configure-classpath project junit-task)
     (configure-jvm-args project junit-task)
@@ -114,8 +116,6 @@
   [project & selectors]
   (javac project)
   (let [junit-task (apply extract-task project selectors)]
-    (.setErrorProperty junit-task "lein-junit.errors")
-    (.setFailureProperty junit-task "lein-junit.failures")
     (.execute junit-task)
     (if (or (.getProperty lancet/ant-project "lein-junit.errors")
             (.getProperty lancet/ant-project "lein-junit.failures"))
