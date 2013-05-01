@@ -6,7 +6,7 @@
             [leiningen.core.classpath :refer [get-classpath]]
             [leiningen.core.main :as main]
             [leiningen.javac :refer [javac]]
-            leiningen.core.eval)
+            [leiningen.core.eval :as eval])
   (:import [java.io File]
            [org.apache.tools.ant.types FileSet Path]
            [org.apache.tools.ant.taskdefs.optional.junit
@@ -15,6 +15,11 @@
 
 (def ^{:dynamic true} *junit-options*
   {:fork "on" :haltonerror "off" :haltonfailure "off"})
+
+(defn junit-compile-path
+  [project]
+  (or (:junit-compile-path project)
+      (:compile-path project)))
 
 (defmethod lancet/coerce [Path String] [_ str]
   (Path. lancet/ant-project str))
@@ -43,7 +48,7 @@
   (let [tests (map str (apply select-testcases project selectors))
         fileset (FileSet.)]
     (.setProject fileset lancet/ant-project)
-    (.setDir fileset (file (:compile-path project)))
+    (.setDir fileset (file (junit-compile-path project)))
     (if (empty? tests)
       (.setExcludes fileset "**/*.class")
       (.setIncludes fileset (join " " (map str tests))))
@@ -91,7 +96,7 @@
   "Configure the classpath for the JUnit task."
   [project junit-task]
   (let [classpath (.createClasspath junit-task)]
-    (doseq [path (get-classpath project)]
+    (doseq [path (concat (get-classpath project) (when-let [p (:junit-compile-path project)] [p]))]
       (.addExisting classpath (Path. lancet/ant-project (str path))))
     classpath))
 
@@ -112,7 +117,12 @@
 (defn junit
   "Run the Java test via JUnit."
   [project & selectors]
-  (javac project)
+  (eval/run-prep-tasks project)
+  (when (some (complement (set (:java-source-paths project))) (:junit project))
+    (javac (assoc project
+             :java-source-paths (:junit project)
+             :compile-path (junit-compile-path project)
+             :resource-paths (concat [(:compile-path project)] (:resource-paths project)))))
   (let [junit-task (apply extract-task project selectors)]
     (.setErrorProperty junit-task "lein-junit.errors")
     (.setFailureProperty junit-task "lein-junit.failures")
