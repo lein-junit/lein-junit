@@ -10,6 +10,14 @@ public class Subscription {
         this.length = length;
     }
 
+    public double getLength() {
+        return length;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
     public double getPricePerMonth() {
         double r = (double) price / (double) length;
         return r ;

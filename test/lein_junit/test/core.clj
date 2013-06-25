@@ -8,6 +8,7 @@
   (:require [clojure.test :refer :all]
             [lancet.core :as lancet]
             [lein-junit.core :refer :all]
+            [leiningen.core.main :refer [*exit-process?*]]
             [leiningen.core.project :refer [read]]))
 
 (def project (read "sample/project.clj"))
@@ -27,23 +28,23 @@
 
 (deftest test-junit-formatter-class
   (are [type expected-class]
-       (is (= (junit-formatter-class type) expected-class))
-       :brief BriefJUnitResultFormatter
-       :plain PlainJUnitResultFormatter
-       :summary SummaryJUnitResultFormatter
-       :xml XMLJUnitResultFormatter
-       "brief" BriefJUnitResultFormatter
-       "plain" PlainJUnitResultFormatter
-       "summary" SummaryJUnitResultFormatter
-       "xml" XMLJUnitResultFormatter))
+    (is (= (junit-formatter-class type) expected-class))
+    :brief BriefJUnitResultFormatter
+    :plain PlainJUnitResultFormatter
+    :summary SummaryJUnitResultFormatter
+    :xml XMLJUnitResultFormatter
+    "brief" BriefJUnitResultFormatter
+    "plain" PlainJUnitResultFormatter
+    "summary" SummaryJUnitResultFormatter
+    "xml" XMLJUnitResultFormatter))
 
 (deftest test-junit-formatter-element
   (are [type expected-class]
-       (let [formatter-element (junit-formatter-element type)]
-         (is (isa? (class formatter-element) FormatterElement))
-         (is (= (.getClassname formatter-element) (.getName (junit-formatter-class type)))))
-       :brief :plain :summary :xml
-       "brief" "plain" "summary" "xml"))
+    (let [formatter-element (junit-formatter-element type)]
+      (is (isa? (class formatter-element) FormatterElement))
+      (is (= (.getClassname formatter-element) (.getName (junit-formatter-class type)))))
+    :brief :plain :summary :xml
+    "brief" "plain" "summary" "xml"))
 
 (deftest test-extract-task
   (let [task (extract-task project)]
@@ -53,28 +54,37 @@
 
 (deftest test-testcase-fileset
   (are [fileset expected]
-       (is (= (sort expected)
-              (sort (seq (.getIncludedFiles (.getDirectoryScanner fileset))))))
-       (testcase-fileset project)
-       ["com/example/SubscriptionTest.class"
-        "com/other/SubscriptionTest.class"]
-       (testcase-fileset project "com.example")
-       ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.example.Subscription")
-       ["com/example/SubscriptionTest.class"]
-       (testcase-fileset project "com.example" "com.other")
-       ["com/example/SubscriptionTest.class"
-        "com/other/SubscriptionTest.class"]
-       (testcase-fileset project "com.another") nil))
+    (is (= (sort expected)
+           (sort (seq (.getIncludedFiles (.getDirectoryScanner fileset))))))
+    (testcase-fileset project)
+    ["com/example/SubscriptionTest.class"
+     "com/other/SubscriptionTest.class"]
+    (testcase-fileset project "com.example")
+    ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.example.Subscription")
+    ["com/example/SubscriptionTest.class"]
+    (testcase-fileset project "com.example" "com.other")
+    ["com/example/SubscriptionTest.class"
+     "com/other/SubscriptionTest.class"]
+    (testcase-fileset project "com.another") nil))
 
-(deftest test-junit-all
+(deftest test-junit
+  ;; TODO: Clear error and failure properties.
   (try
-    (junit project)
+    (binding [*exit-process?* false]
+      (junit project "com.other"))
     (catch clojure.lang.ExceptionInfo e
-      (is (= "Suppressed exit" (.getMessage e))))))
-
-(deftest test-junit-selector
+      (is (= "Suppressed exit" (.getMessage e)))
+      (is (= {:exit-code 0} (.getData e)))))
   (try
-    (junit project "com.example" "com.other")
+    (binding [*exit-process?* false]
+      (junit project "com.example"))
     (catch clojure.lang.ExceptionInfo e
-      (is (= "Suppressed exit" (.getMessage e))))))
+      (is (= "Suppressed exit" (.getMessage e)))
+      (is (= {:exit-code 1} (.getData e)))))
+  (try
+    (binding [*exit-process?* false]
+      (junit project))
+    (catch clojure.lang.ExceptionInfo e
+      (is (= "Suppressed exit" (.getMessage e)))
+      (is (= {:exit-code 1} (.getData e))))))
