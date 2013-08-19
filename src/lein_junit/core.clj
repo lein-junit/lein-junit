@@ -117,7 +117,6 @@
   (javac project)
   (let [junit-task (apply extract-task project selectors)]
     (.execute junit-task)
-    (if (or (.getProperty lancet/ant-project "lein-junit.errors")
-            (.getProperty lancet/ant-project "lein-junit.failures"))
-      (main/abort "JUnit tests failed.")
-      (main/exit 0))))
+    (when (or (.getProperty lancet/ant-project "lein-junit.errors")
+              (.getProperty lancet/ant-project "lein-junit.failures"))
+      (main/abort "JUnit tests failed."))))
