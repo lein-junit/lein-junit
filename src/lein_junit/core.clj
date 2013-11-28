@@ -14,7 +14,7 @@
             PlainJUnitResultFormatter XMLJUnitResultFormatter]))
 
 (def ^{:dynamic true} *junit-options*
-  {:fork "on" :haltonerror "off" :haltonfailure "off"})
+  {:fork "on" :haltonerror "off" :haltonfailure "off" }) 
 
 (defmethod lancet/coerce [Path String] [_ str]
   (Path. lancet/ant-project str))
@@ -62,14 +62,15 @@
 (defn junit-formatter-element
   "Returns a JUnit formatter element for the given type. Type can be a
   string or a keyword."
-  [type & [use-file]]
+  [type use-file?]
   (doto (FormatterElement.)
     (.setClassname (.getName (junit-formatter-class type)))
-    (.setUseFile false)))
+    (.setUseFile use-file?)))
 
 (defn extract-formatter
   "Extract the Junit formatter element from the project."
-  [project] (junit-formatter-element (or (:junit-formatter project) :brief)))
+  [project] (junit-formatter-element (or (:junit-formatter project) :brief) 
+                                     (not (nil? (:junit-results-dir project)))))
 
 (defn junit-options
   "Returns the JUnit options of the project."
@@ -79,9 +80,12 @@
   "Configure the JUnit batch test."
   [project junit-task & filesets]
   (let [batch-task (.createBatchTest junit-task)
-        junit-options (junit-options project)]
+        junit-options (junit-options project)
+        todir (File. (or (:junit-results-dir project) "."))]
+    (.mkdirs todir)
     (doseq [fileset filesets] (.addFileSet batch-task fileset))
     (doto batch-task
+      (.setTodir todir)
       (.addFormatter (extract-formatter project))
       (.setFork (lancet/coerce Boolean/TYPE (:fork junit-options)))
       (.setHaltonerror (lancet/coerce Boolean/TYPE (:haltonerror junit-options)))
