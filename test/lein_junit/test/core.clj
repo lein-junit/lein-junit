@@ -40,7 +40,7 @@
 
 (deftest test-junit-formatter-element
   (are [type expected-class]
-    (let [formatter-element (junit-formatter-element type)]
+    (let [formatter-element (junit-formatter-element type false)]
       (is (isa? (class formatter-element) FormatterElement))
       (is (= (.getClassname formatter-element) (.getName (junit-formatter-class type)))))
     :brief :plain :summary :xml
@@ -87,4 +87,11 @@
       (junit project))
     (catch clojure.lang.ExceptionInfo e
       (is (= "Suppressed exit" (.getMessage e)))
-      (is (= {:exit-code 1} (.getData e))))))
+      (is (= {:exit-code 1} (.getData e)))))
+   (let [results-dir (java.io.File. (project :junit-results-dir))]
+         (is true (.isDirectory results-dir))
+         (is true (-> (.listFiles results-dir (reify java.io.FilenameFilter (accept [_ _ name] (.endsWith name (project :junit-formatter)))))
+                      count
+                      (> 0)))))
+
+
