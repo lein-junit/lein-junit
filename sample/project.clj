@@ -7,4 +7,8 @@
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java" "test/java"]
   :junit ["test/java"]
-  :jvm-opts ["-XX:MaxPermSize=128m"])
+  :jvm-opts ["-XX:MaxPermSize=128m"] ;; these will be used as the opts for the junit process
+  :junit-formatter "xml" ;; brief, plain, xml or summary. keyword or string
+  :junit-results-dir "test-results"
+  
+)
