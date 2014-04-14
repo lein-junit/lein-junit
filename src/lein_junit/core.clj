@@ -20,7 +20,7 @@
   (Path. lancet/ant-project str))
 
 (defn selector-pattern [selector]
-  (re-pattern (str (replace selector "." File/separator) ".*")))
+  (re-pattern (str (replace selector \. \/) ".*")))
 
 (defn find-testcases
   "Returns the class filesnames of the project's Junit test cases."
@@ -29,7 +29,8 @@
         file (file-seq (file (:root project) path))
         :when (and (not (.isDirectory file))
                    (re-matches #".*Test\.java" (str file)))]
-    (-> (replace (str file) (re-pattern (str ".*" File/separator path File/separator)) "")
+    (-> (replace (str file) File/separatorChar \/)
+        (replace (re-pattern (str ".*/" path "/")) "")
         (replace #"\.java" ".class"))))
 
 (defn select-testcases
