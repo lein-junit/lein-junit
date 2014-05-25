@@ -103,7 +103,8 @@
 (defn configure-jvm-args
   "Configure the JVM arguments for the JUnit task."
   [project junit-task]
-  (doseq [arg (@#'leiningen.core.eval/get-jvm-args project)]
+  (doseq [arg (concat (@#'leiningen.core.eval/get-jvm-args project)
+                      (get-in project [:lein-junit :jvm-opts]))]
     (when-not (re-matches #"^-Xbootclasspath.+" arg)
       (.setValue (.createJvmarg junit-task) arg))))
 
