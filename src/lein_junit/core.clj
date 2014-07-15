@@ -100,12 +100,20 @@
       (.addExisting classpath (Path. lancet/ant-project (str path))))
     classpath))
 
+
 (defn configure-jvm-args
   "Configure the JVM arguments for the JUnit task."
   [project junit-task]
-  (doseq [arg (@#'leiningen.core.eval/get-jvm-args project)]
-    (when-not (re-matches #"^-Xbootclasspath.+" arg)
-      (.setValue (.createJvmarg junit-task) arg))))
+  (let [fork? (-> project (junit-options) :fork #{"true" "on"})
+        lein-jar (-> (System/getProperty "java.class.path")
+                     (clojure.string/split #":")
+                     ((partial filter #(re-matches #".*leiningen-[\d\.]+-standalone.jar$" %)))
+                     first)]
+    (doseq [arg (@#'leiningen.core.eval/get-jvm-args project)]
+      (if (re-matches #"^-Xbootclasspath.+" arg) 
+        (if fork?
+          (.setValue (.createJvmarg junit-task) (str arg java.io.File/pathSeparator lein-jar)))
+        (.setValue (.createJvmarg junit-task) arg)))))
 
 (defn extract-task [project & selectors]
   (let [junit-task (lancet/junit (junit-options project))]
