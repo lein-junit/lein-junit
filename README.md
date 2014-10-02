@@ -1,4 +1,5 @@
 # LEIN-JUNIT [![Build Status](https://travis-ci.org/febeling/lein-junit.png)](https://travis-ci.org/febeling/lein-junit)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/febeling/lein-junit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A Leiningen plugin that runs Java tests via JUnit.
 
