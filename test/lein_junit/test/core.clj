@@ -74,20 +74,23 @@
     (binding [*exit-process?* false]
       (junit project "com.other"))
     (catch clojure.lang.ExceptionInfo e
-      (is (= "Suppressed exit" (.getMessage e)))
+      (is (or (= "Suppressed exit" (.getMessage e))
+              (= "JUnit tests failed." (.getMessage e))))
       (is (= {:exit-code 0} (.getData e)))))
   (try
     (binding [*exit-process?* false]
       (junit project "com.example"))
     (catch clojure.lang.ExceptionInfo e
-      (is (= "Suppressed exit" (.getMessage e)))
-      (is (= {:exit-code 1} (.getData e)))))
+      (is (or (= "Suppressed exit" (.getMessage e))
+              (= "JUnit tests failed." (.getMessage e))))
+      (is (= 1 (:exit-code (.getData e))))))
   (try
     (binding [*exit-process?* false]
       (junit project))
     (catch clojure.lang.ExceptionInfo e
-      (is (= "Suppressed exit" (.getMessage e)))
-      (is (= {:exit-code 1} (.getData e)))))
+      (is (or (= "Suppressed exit" (.getMessage e))
+              (= "JUnit tests failed." (.getMessage e))))
+      (is (= 1 (:exit-code (.getData e))))))
    (let [results-dir (java.io.File. (project :junit-results-dir))]
          (is true (.isDirectory results-dir))
          (is true (-> (.listFiles results-dir (reify java.io.FilenameFilter (accept [_ _ name] (.endsWith name (project :junit-formatter)))))
