@@ -97,4 +97,14 @@
                       count
                       (> 0)))))
 
+(deftest test-file-pattern
+  ; file pattern that does not work
+  (is (empty? (find-testcases (assoc project :junit-test-file-pattern #".*Tesd\.java"))))
+
+  ; file pattern that does work
+  (is (= 2 (count (find-testcases (assoc project :junit-test-file-pattern #".*\Subscription.*\.java")))))
+  
+  ; check the default case
+  (is (= 2 (count (find-testcases project)))))
+
 
