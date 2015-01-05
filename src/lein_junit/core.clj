@@ -28,7 +28,7 @@
   (for [path (:junit project)
         file (file-seq (file (:root project) path))
         :when (and (not (.isDirectory file))
-                   (re-matches #".*Test\.java" (str file)))]
+                   (re-matches (:junit-test-file-pattern project #".*Test\.java") (str file)))]
     (-> (replace (str file) File/separatorChar \/)
         (replace (re-pattern (str ".*/" path "/")) "")
         (replace #"\.java" ".class"))))
