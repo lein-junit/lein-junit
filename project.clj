@@ -1,4 +1,4 @@
-(defproject lein-junit "1.1.8"
+(defproject lein-junit "1.1.9-SNAPSHOT"
   :author "Caspar Florian Ebeling, Roman Scherer"
   :description "JUnit plugin for Leiningen"
   :url "http://github.com/febeling/lein-junit"
