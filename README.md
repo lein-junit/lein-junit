@@ -30,6 +30,6 @@ Run all junit tests matching a pattern.
 
 ## License
 
-Copyright (C) 2013 Florian Ebeling, Roman Scherer
+Copyright (C) 2013-2015 Florian Ebeling, Roman Scherer
 
 Distributed under the Eclipse Public License, the same as Clojure.
