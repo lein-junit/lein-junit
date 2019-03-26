@@ -116,13 +116,18 @@
 (deftest test-parse-task-arg-options
   (let [basic-args [":junit-formatter" "brief"]]
     (is (= (:options (parse-task-args {} basic-args)) {:junit-formatter "brief"})))
-  (let [basic-args [":junit-formatter" ":brief"]]
-    (is (= (:options (parse-task-args {} basic-args)) {:junit-formatter :brief})))
-  (let [kw-args [":junit-formatter" "plain"]]
-    (is (= (:options (parse-task-args {} kw-args)) {:junit-formatter "plain"})))
+  (let [basic-args [":junit-formatter" "plain"]]
+    (is (= (:options (parse-task-args {} basic-args)) {:junit-formatter "plain"})))
+  (let [kw-args [":junit-formatter" ":brief"]]
+    (is (= (:options (parse-task-args {} kw-args)) {:junit-formatter :brief})))
   (let [project {:junit-results-dir "."}
-        kw-args [":junit-formatter" ":summary"]]
-    (is (= (:options (parse-task-args project kw-args)) {:junit-results-dir "." :junit-formatter :summary})))
+        merge-args [":junit-formatter" ":summary"]]
+    (is (= (:options (parse-task-args project merge-args)) {:junit-results-dir "." :junit-formatter :summary})))
   (let [project {:junit-formatter :plain}
-        kw-args [":junit-formatter" "xml"]]
-    (is (= (:options (parse-task-args project kw-args)) {:junit-formatter "xml"}))))
+        override-args [":junit-formatter" "xml"]]
+    (is (= (:options (parse-task-args project override-args)) {:junit-formatter "xml"}))))
+
+(deftest test-parse-task-args
+  (let [args ["test-pattern" ":junit-formatter" "brief" "test-pattern2"]]
+    (is (= (parse-task-args {} args) {:options {:junit-formatter "brief"}
+                                      :selectors ["test-pattern" "test-pattern2"]}))))
