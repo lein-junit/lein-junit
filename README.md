@@ -22,7 +22,7 @@ These arguments are acceptable on the CLI as well, and can be given with or with
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.6.0"]]
   :profiles {:dev {:dependencies [[junit/junit "4.11"]]}}
-  :plugins [[lein-junit "1.1.8"]]
+  :plugins [[lein-junit "1.1.9-SNAPSHOT"]]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java" "test/java"]
   :junit ["test/java"]
@@ -37,13 +37,11 @@ Run all junit tests.
 
     lein junit
 
-
 Run all junit tests matching a pattern.
 
     lein junit com.example
 
-
-Run all junit tests matching a paterrn, outputting XML results to "test-results"
+Run all junit tests matching a paterrn, outputting XML results to "test-results/"
 
     lein junit :junit-formatter xml :junit-results-dir test-results com.example
 
