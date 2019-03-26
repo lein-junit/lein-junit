@@ -8,6 +8,7 @@
   (:require [clojure.test :refer :all]
             [lancet.core :as lancet]
             [lein-junit.core :refer :all]
+            [lein-junit.task-args :refer :all]
             [leiningen.core.main :refer [*exit-process?*]]
             [leiningen.core.project :refer [read]]))
 
@@ -15,7 +16,7 @@
 (def fileset-spec ["classes" :includes "**/*Test.class"])
 
 (deftest test-configure-batch-test
-  (is (instance? BatchTest (configure-batch-test project (lancet/junit {}) (testcase-fileset project)))))
+  (is (instance? BatchTest (configure-batch-test {} project (lancet/junit {}) (testcase-fileset project)))))
 
 (deftest test-configure-classpath
   (is (configure-classpath project (lancet/junit {}))))
@@ -47,9 +48,9 @@
     "brief" "plain" "summary" "xml"))
 
 (deftest test-extract-task
-  (let [task (extract-task project)]
+  (let [task (extract-task project {})]
     (is (isa? (class task) JUnitTask)))
-  (let [task (extract-task project "com.example")]
+  (let [task (extract-task project {} "com.example")]
     (is (isa? (class task) JUnitTask))))
 
 (deftest test-testcase-fileset
@@ -97,8 +98,31 @@
 
   ; file pattern that does work
   (is (= 2 (count (find-testcases (assoc project :junit-test-file-pattern #".*\Subscription.*\.java")))))
-  
+
   ; check the default case
   (is (= 2 (count (find-testcases project)))))
 
+(deftest test-arg-formatter
+  (is (= (keywordify-args ["a" ":b" "c"]) ["a" :b "c"])))
 
+(deftest test-parse-task-arg-selectors
+  (let [basic-args ["a" "b"]]
+    (is (= (:selectors (parse-task-args {} basic-args)) basic-args)))
+  (let [empty-args []]
+    (is (= (:selectors (parse-task-args {} empty-args)) [])))
+  (let [options-args ["a" ":junit-formatter" ":brief" "b"]]
+    (is (= (:selectors (parse-task-args {} options-args)) ["a" "b"]))))
+
+(deftest test-parse-task-arg-options
+  (let [basic-args [":junit-formatter" "brief"]]
+    (is (= (:options (parse-task-args {} basic-args)) {:junit-formatter "brief"})))
+  (let [basic-args [":junit-formatter" ":brief"]]
+    (is (= (:options (parse-task-args {} basic-args)) {:junit-formatter :brief})))
+  (let [kw-args [":junit-formatter" "plain"]]
+    (is (= (:options (parse-task-args {} kw-args)) {:junit-formatter "plain"})))
+  (let [project {:junit-results-dir "."}
+        kw-args [":junit-formatter" ":summary"]]
+    (is (= (:options (parse-task-args project kw-args)) {:junit-results-dir "." :junit-formatter :summary})))
+  (let [project {:junit-formatter :plain}
+        kw-args [":junit-formatter" "xml"]]
+    (is (= (:options (parse-task-args project kw-args)) {:junit-formatter "xml"}))))
