@@ -1,6 +1,7 @@
 (ns lein-junit.core
   (:refer-clojure :exclude [replace])
-  (:require [clojure.java.io :refer [file]]
+  (:require [lein-junit.task-args :refer [parse-task-args]]
+            [clojure.java.io :refer [file]]
             [clojure.string :refer [join replace]]
             [lancet.core :as lancet]
             [leiningen.core.classpath :refer [get-classpath]]
@@ -14,7 +15,7 @@
             PlainJUnitResultFormatter XMLJUnitResultFormatter]))
 
 (def ^{:dynamic true} *junit-options*
-  {:fork "on" :haltonerror "off" :haltonfailure "off" }) 
+  {:fork "on" :haltonerror "off" :haltonfailure "off" })
 
 (defmethod lancet/coerce [Path String] [_ str]
   (Path. lancet/ant-project str))
@@ -70,8 +71,8 @@
 
 (defn extract-formatter
   "Extract the Junit formatter element from the project."
-  [project] (junit-formatter-element (or (:junit-formatter project) :brief) 
-                                     (not (nil? (:junit-results-dir project)))))
+  [options] (junit-formatter-element (or (:junit-formatter options) :brief)
+                                     (not (nil? (:junit-results-dir options)))))
 
 (defn junit-options
   "Returns the JUnit options of the project."
@@ -79,15 +80,15 @@
 
 (defn configure-batch-test
   "Configure the JUnit batch test."
-  [project junit-task & filesets]
+  [project options junit-task & filesets]
   (let [batch-task (.createBatchTest junit-task)
         junit-options (junit-options project)
-        todir (File. (or (:junit-results-dir project) "."))]
+        todir (File. (or (:junit-results-dir options) "."))]
     (.mkdirs todir)
     (doseq [fileset filesets] (.addFileSet batch-task fileset))
     (doto batch-task
       (.setTodir todir)
-      (.addFormatter (extract-formatter project))
+      (.addFormatter (extract-formatter options))
       (.setFork (lancet/coerce Boolean/TYPE (:fork junit-options)))
       (.setHaltonerror (lancet/coerce Boolean/TYPE (:haltonerror junit-options)))
       (.setHaltonfailure (lancet/coerce Boolean/TYPE (:haltonfailure junit-options))))))
@@ -110,25 +111,26 @@
                      ((partial filter #(re-matches #".*leiningen-[\d\.]+-standalone.jar$" %)))
                      first)]
     (doseq [arg (@#'leiningen.core.eval/get-jvm-args project)]
-      (if (re-matches #"^-Xbootclasspath.+" arg) 
+      (if (re-matches #"^-Xbootclasspath.+" arg)
         (if fork?
           (.setValue (.createJvmarg junit-task) (str arg java.io.File/pathSeparator lein-jar)))
         (.setValue (.createJvmarg junit-task) arg)))))
 
-(defn extract-task [project & selectors]
+(defn extract-task [project options & selectors]
   (let [junit-task (lancet/junit (junit-options project))]
     (.setErrorProperty junit-task "lein-junit.errors")
     (.setFailureProperty junit-task "lein-junit.failures")
-    (configure-batch-test project junit-task (apply testcase-fileset project selectors))
+    (configure-batch-test project options junit-task (apply testcase-fileset project selectors))
     (configure-classpath project junit-task)
     (configure-jvm-args project junit-task)
     junit-task))
 
 (defn junit
   "Run the Java test via JUnit."
-  [project & selectors]
+  [project & task-args]
   (javac project)
-  (let [junit-task (apply extract-task project selectors)]
+  (let [task-options (parse-task-args project task-args)
+        junit-task (apply extract-task project (:options task-options) (:selectors task-options))]
     (.execute junit-task)
     (when (or (.getProperty lancet/ant-project "lein-junit.errors")
               (.getProperty lancet/ant-project "lein-junit.failures"))
